@@ -17,7 +17,8 @@ def main():
     # [未使用] scripts.clean_html_content_by_boilerpy - 效果不理想
 
     # # Step 4: 信息向量化与聚类分析
-    # 
+    # scripts.normalize_and_embedding - 归一化和向量化
+    # scripts.clustering_and_sort - 聚类分析
 
     # # Step 5: 信息溯源方法
     # 
