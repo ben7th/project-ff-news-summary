@@ -6,13 +6,13 @@ import tiktoken
 from langchain.chat_models import ChatOpenAI
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
-from utils.remove_html_tags import get_text_content
+DEFAULT_MODEL_NAME = 'gpt-3.5-turbo'
 
 def count_tokens(text):
-    llm = ChatOpenAI(temperature=0, model_name='gpt-3.5-turbo')
+    llm = ChatOpenAI(temperature=0, model_name=DEFAULT_MODEL_NAME)
     return llm.get_num_tokens(text)
 
-def num_tokens_from_string(string: str, encoding_name: str='gpt-3.5-turbo') -> int:
+def num_tokens_from_string(string: str, encoding_name: str=DEFAULT_MODEL_NAME) -> int:
     """Returns the number of tokens in a text string."""
     encoding = tiktoken.encoding_for_model(encoding_name)
     num_tokens = len(encoding.encode(string))
@@ -25,7 +25,9 @@ def split_text_by_tokens(text_content: str, chunk_size):
     texts = text_splitter.split_text(text_content)
     return texts
 
-def normalize_text(text, max_num_tokens=500):
+def normalize_split_text(text, max_num_tokens=500):
+    """按照 tokens 数目进行文本归一化切分，只会按照换行符切分"""
+
     lines = text.split("\n")  # 按照换行符切分文本为行
 
     normalized_blocks = []
