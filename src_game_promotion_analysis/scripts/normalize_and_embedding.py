@@ -49,6 +49,8 @@ if __name__ == "__main__":
     print(f'共 {records.count()} 条记录')
 
     no_summary_count = 0
+    has_embeddings_count = 0
+    do_embeddings_count = 0
 
     for record in records:
         # 忽略无摘要的网页
@@ -58,13 +60,22 @@ if __name__ == "__main__":
             no_summary_count += 1
             continue
 
+        # 向量化
+        if record.block_embeddings:
+            logger.info(f'已保存过向量化结果，忽略: {record.url} {record.title}')
+            has_embeddings_count += 1
+            continue
+
         # 保存归一化文本
         normalized_blocks = __save_normalized_blocks(record, summary_text)
 
-        # 向量化
         print(normalized_blocks)
         embeddings = openai_embeddings(normalized_blocks)
-        print(embeddings)
-        break
+        record.block_embeddings = embeddings
+        record.save()
+        logger.info(f'保存向量化结果 {len(embeddings)} blocks: {record.url} {record.title}')
+        do_embeddings_count += 1
 
     print(f'没有摘要文本: {no_summary_count} 条记录')
+    print(f'已保存过向量化结果: {has_embeddings_count} 条记录')
+    print(f'保存向量化结果: {do_embeddings_count} 条记录')
