@@ -8,26 +8,28 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 DEFAULT_MODEL_NAME = 'gpt-3.5-turbo'
 
-def count_tokens(text):
-    llm = ChatOpenAI(temperature=0, model_name=DEFAULT_MODEL_NAME)
-    return llm.get_num_tokens(text)
-
-def num_tokens_from_string(string: str, encoding_name: str=DEFAULT_MODEL_NAME) -> int:
-    """Returns the number of tokens in a text string."""
-    encoding = tiktoken.encoding_for_model(encoding_name)
+def num_tokens_from_string(string: str, model_name: str=DEFAULT_MODEL_NAME) -> int:
+    """
+    返回文本字符串中的 token 数量。
+    """
+    encoding = tiktoken.encoding_for_model(model_name)
     num_tokens = len(encoding.encode(string))
     return num_tokens
 
-def split_text_by_tokens(text_content: str, chunk_size):
+def split_text_by_tokens(text_content: str, chunk_size: int):
+    """
+    按照给定的 token 数量将文本切分为多个部分。
+    """
     text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
         chunk_size=chunk_size, chunk_overlap=0
     )
     texts = text_splitter.split_text(text_content)
     return texts
 
-def normalize_split_text(text, max_num_tokens=500):
-    """按照 tokens 数目进行文本归一化切分，只会按照换行符切分"""
-
+def normalize_split_text(text: str, max_num_tokens: int=500) -> list:
+    """
+    根据 token 数量对文本进行归一化切分，仅按照换行符进行切分。
+    """
     lines = text.split("\n")  # 按照换行符切分文本为行
 
     normalized_blocks = []
