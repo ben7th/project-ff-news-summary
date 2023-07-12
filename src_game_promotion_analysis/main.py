@@ -1,12 +1,3 @@
-from src.extraction import extract_webpage_content
-from src.summarization import summarize_content
-from src.analysis import analyze_content
-from src.tracing import trace_information
-from src.timeline import organize_timeline
-from src.storage import save_data
-from src.visualization import visualize_data
-
-
 def main():
     # Step 1: 获取网页地址 - 手工操作，不整合进流程
     # scripts.get_webpage_urls

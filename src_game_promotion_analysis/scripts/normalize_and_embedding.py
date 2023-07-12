@@ -5,6 +5,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from mongoengine import connect
 
 from utils.tokens import normalize_split_text
+from utils.embedding import openai_embeddings
 from models.web_page_item import WebPageItem
 from logger.setup_logger import get_loguru_logger
 
@@ -62,6 +63,8 @@ if __name__ == "__main__":
 
         # 向量化
         print(normalized_blocks)
+        embeddings = openai_embeddings(normalized_blocks)
+        print(embeddings)
         break
 
     print(f'没有摘要文本: {no_summary_count} 条记录')
