@@ -34,7 +34,7 @@ def __save_normalized_blocks(record: WebPageItem, summary_text: str) -> list:
     if record.normalized_text_blocks:
         return record.normalized_text_blocks
 
-    normalized_blocks = normalize_split_text(summary_text)
+    normalized_blocks = normalize_split_text(summary_text, max_num_tokens=300)
     record.normalized_text_blocks = normalized_blocks
     record.save()
     logger.info(f'保存归一化文本: {record.url} {record.title}')
@@ -42,17 +42,18 @@ def __save_normalized_blocks(record: WebPageItem, summary_text: str) -> list:
     return normalized_blocks
 
 
-if __name__ == "__main__":
+def normalize_and_embedding():
     """文本长度归一化和向量化"""
 
     records = WebPageItem.objects
-    print(f'共 {records.count()} 条记录')
+    total = records.count()
+    print(f'共 {total} 条记录')
 
     no_summary_count = 0
     has_embeddings_count = 0
     do_embeddings_count = 0
 
-    for record in records:
+    for index, record in enumerate(records):
         # 忽略无摘要的网页
         summary_text = __get_summary_text(record)
         if not summary_text:
@@ -69,13 +70,27 @@ if __name__ == "__main__":
         # 保存归一化文本
         normalized_blocks = __save_normalized_blocks(record, summary_text)
 
-        print(normalized_blocks)
+        # print(normalized_blocks)
         embeddings = openai_embeddings(normalized_blocks)
         record.block_embeddings = embeddings
         record.save()
-        logger.info(f'保存向量化结果 {len(embeddings)} blocks: {record.url} {record.title}')
+        logger.info(f'{index + 1}/{total} 保存向量化结果 {len(embeddings)} blocks: {record.url} {record.title}')
         do_embeddings_count += 1
 
     print(f'没有摘要文本: {no_summary_count} 条记录')
     print(f'已保存过向量化结果: {has_embeddings_count} 条记录')
     print(f'保存向量化结果: {do_embeddings_count} 条记录')
+
+def clear():
+    records = WebPageItem.objects
+    count = records.count()
+    for index, record in enumerate(records):
+        record.normalized_text_blocks = []
+        record.block_embeddings = []
+        record.save()
+        print(f'cleared record {index + 1}/{count}')
+
+
+if __name__ == "__main__":
+    # clear()
+    normalize_and_embedding()
