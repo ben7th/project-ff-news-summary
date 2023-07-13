@@ -7,7 +7,7 @@ from mongoengine import connect
 from utils.tokens import normalize_split_text
 from utils.embedding import openai_embeddings
 from models.web_page_item import WebPageItem
-from utils.clustering import hierarchical_clustering
+from utils.clustering import clustering, get_labels_of_cluster
 
 from logger.setup_logger import get_loguru_logger
 
@@ -47,14 +47,15 @@ if __name__ == "__main__":
     print(f'没有向量数据: {no_embedding_count} 条记录')
 
     # 聚类
-    largest_cluster_labels = hierarchical_clustering(all_embeddings_vectors, all_embeddings_labels)
-    print(largest_cluster_labels)
-    print(len(largest_cluster_labels))
+    sorted_clusters, clusters = clustering(all_embeddings_vectors, all_embeddings_labels)
+    
+    # 最大的簇
+    largest_cluster = sorted_clusters[0]
+    largest_cluster_labels = get_labels_of_cluster(clusters, largest_cluster, all_embeddings_labels)
+    # print(f"Largest cluster: {largest_cluster_labels}")
+    ids = [label.split('-')[0] for label in largest_cluster_labels]
+    unique_ids = list(set(ids))
+    print(f"IDs: {unique_ids}")
 
-    # arr = label.split('-')
-    # id = arr[0]
-    # index = int(arr[2])
-
-    # record = WebPageItem.objects.get(id=id)
-    # block = record.normalized_text_blocks[index]
-    # print(block)
+    cluster_records = WebPageItem.objects(id__in=unique_ids)
+    print([record.title for record in cluster_records])

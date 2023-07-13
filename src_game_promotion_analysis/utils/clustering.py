@@ -36,9 +36,9 @@ def get_labels_of_cluster(clusters, cluster, labels):
     # return [labels[i] for i, c in enumerate(clusters) if c == cluster]
 
 
-def hierarchical_clustering(vectors, labels):
+def clustering(vectors, labels):
     """
-    使用层次聚类算法进行聚类分析，找到最大簇对应的标签和最接近中心的向量对应的标签。
+    使用层次聚类算法进行聚类分析，按照簇的大小进行排序，返回排序后的集合
 
     :param vectors: 向量数组
     :type vectors: List[List[float]]
@@ -61,13 +61,14 @@ def hierarchical_clustering(vectors, labels):
 
     # 按簇的大小进行排序
     sorted_clusters = np.argsort(cluster_sizes)[::-1]
-
+    
     for index in range(len(sorted_clusters)):
         cluster = sorted_clusters[index]
         size = cluster_sizes[cluster]
         print(f"Cluster {cluster}: Size {size}")
 
-    # 获取最大簇对应的标签
-    largest_cluster_labels = get_labels_of_cluster(clusters, sorted_clusters[0], labels)
+    # largest_cluster = sorted_clusters[0]
+    # largest_cluster_labels = get_labels_of_cluster(clusters, largest_cluster, labels)
+    # print(f"Largest cluster: {largest_cluster_labels}")
 
-    return largest_cluster_labels
+    return sorted_clusters, clusters
