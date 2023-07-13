@@ -1,6 +1,40 @@
 from sklearn.cluster import AgglomerativeClustering
+from sklearn.cluster import KMeans
+from sklearn.cluster import SpectralClustering
+from sklearn.cluster import DBSCAN
+from sklearn.cluster import MeanShift
+
 from sklearn.metrics import pairwise_distances
 import numpy as np
+
+def get_labels_of_cluster(clusters, cluster, labels):
+    """
+    获取指定簇对应的标签。
+
+    :param clusters: 聚类结果数组，每个元素表示一个数据点所属的簇的标签或索引。
+    :type clusters: list
+    :param cluster: 指定簇的标签或索引。
+    :type cluster: int
+    :param labels: 每个数据点对应的标签数组。
+    :type labels: list
+    :return: 指定簇对应的标签列表。
+    :rtype: list
+    """
+    # 创建一个空列表，用于存储指定簇对应的标签
+    cluster_labels = []
+
+    # 遍历 clusters 数组
+    for i, c in enumerate(clusters):
+        # 如果当前数据点的簇标签与指定簇相等
+        if c == cluster:
+            # 将对应数据点的标签添加到 cluster_labels 列表中
+            cluster_labels.append(labels[i])
+
+    # 返回指定簇对应的标签列表
+    return cluster_labels
+
+    # return [labels[i] for i, c in enumerate(clusters) if c == cluster]
+
 
 def hierarchical_clustering(vectors, labels):
     """
@@ -14,27 +48,26 @@ def hierarchical_clustering(vectors, labels):
     :rtype: Tuple[List[str], str]
     """
     # 聚类分析
-    clustering = AgglomerativeClustering(metric='euclidean', linkage='ward', n_clusters=100)
+    # clustering = AgglomerativeClustering(n_clusters=50)
+    # clustering = KMeans(n_clusters=50, n_init='auto')
+    # clustering = SpectralClustering()
+    clustering = SpectralClustering(n_clusters=50)
+    # clustering = DBSCAN()
+    # clustering = MeanShift() # 均值漂移，效果不理想
     clusters = clustering.fit_predict(vectors)
 
-    # 找到最大的簇
+    # 统计每个簇的大小
     cluster_sizes = np.bincount(clusters)
-    largest_cluster_index = np.argmax(cluster_sizes)
 
-    print(cluster_sizes)
+    # 按簇的大小进行排序
+    sorted_clusters = np.argsort(cluster_sizes)[::-1]
 
-    # 获取最大簇的标签
-    largest_cluster_labels = [labels[i] for i, cluster in enumerate(clusters) if cluster == largest_cluster_index]
+    for index in range(len(sorted_clusters)):
+        cluster = sorted_clusters[index]
+        size = cluster_sizes[cluster]
+        print(f"Cluster {cluster}: Size {size}")
 
-    # 找到最大簇的中心向量
-    largest_cluster_vectors = [vectors[i] for i, cluster in enumerate(clusters) if cluster == largest_cluster_index]
-    largest_cluster_center = np.mean(largest_cluster_vectors, axis=0)
+    # 获取最大簇对应的标签
+    largest_cluster_labels = get_labels_of_cluster(clusters, sorted_clusters[0], labels)
 
-    # 找到最接近中心的向量索引
-    distances = pairwise_distances(vectors, [largest_cluster_center], metric='euclidean')
-    closest_vector_index = np.argmin(distances)
-
-    # 获取最接近中心的向量对应的标签
-    closest_vector_label = labels[closest_vector_index]
-
-    return largest_cluster_labels, closest_vector_label
+    return largest_cluster_labels

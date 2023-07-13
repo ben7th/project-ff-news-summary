@@ -34,7 +34,7 @@ if __name__ == "__main__":
         # 忽略无向量数据的网页
         block_embeddings = record.block_embeddings
         if not block_embeddings:
-            logger.info(f'没有向量数据，忽略: {record.url} {record.title}')
+            # logger.info(f'没有向量数据，忽略: {record.url} {record.title}')
             no_embedding_count += 1
             continue
 
@@ -47,15 +47,14 @@ if __name__ == "__main__":
     print(f'没有向量数据: {no_embedding_count} 条记录')
 
     # 聚类
-    labels, label = hierarchical_clustering(all_embeddings_vectors, all_embeddings_labels)
-    print(labels)
-    print(len(labels))
-    print(label)
+    largest_cluster_labels = hierarchical_clustering(all_embeddings_vectors, all_embeddings_labels)
+    print(largest_cluster_labels)
+    print(len(largest_cluster_labels))
 
-    arr = label.split('-')
-    id = arr[0]
-    index = int(arr[2])
+    # arr = label.split('-')
+    # id = arr[0]
+    # index = int(arr[2])
 
-    record = WebPageItem.objects.get(id=id)
-    block = record.normalized_text_blocks[index]
-    print(block)
+    # record = WebPageItem.objects.get(id=id)
+    # block = record.normalized_text_blocks[index]
+    # print(block)
