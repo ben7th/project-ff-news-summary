@@ -17,6 +17,16 @@ logger = get_loguru_logger('clustering_and_sort', log_file_path='../logs/cluster
 # 连接到 MongoDB 数据库
 connect('ff16-news-collector')
 
+def get_text_blocks_of_labels(labels):
+    blocks = []
+
+    for label in labels:
+        [id, _, index] = label.split('-')
+        record = WebPageItem.objects(id=id).first()
+        text_block = record.normalized_text_blocks[int(index)]
+        blocks.append(text_block)
+
+    return blocks
 
 if __name__ == "__main__":
     """文本长度归一化和向量化"""
@@ -47,15 +57,18 @@ if __name__ == "__main__":
     print(f'没有向量数据: {no_embedding_count} 条记录')
 
     # 聚类
-    sorted_clusters, clusters = clustering(all_embeddings_vectors, all_embeddings_labels)
+    sorted_clusters, clusters = clustering(all_embeddings_vectors, all_embeddings_labels, n_clusters=50)
     
     # 最大的簇
     largest_cluster = sorted_clusters[0]
     largest_cluster_labels = get_labels_of_cluster(clusters, largest_cluster, all_embeddings_labels)
     # print(f"Largest cluster: {largest_cluster_labels}")
-    ids = [label.split('-')[0] for label in largest_cluster_labels]
-    unique_ids = list(set(ids))
-    print(f"IDs: {unique_ids}")
+    # ids = [label.split('-')[0] for label in largest_cluster_labels]
+    # unique_ids = list(set(ids))
+    # print(f"IDs: {unique_ids}")
 
-    cluster_records = WebPageItem.objects(id__in=unique_ids)
-    print([record.title for record in cluster_records])
+    # cluster_records = WebPageItem.objects(id__in=unique_ids)
+    # print([record.title for record in cluster_records])
+
+    blocks = get_text_blocks_of_labels(largest_cluster_labels)
+    print(blocks)

@@ -36,7 +36,7 @@ def get_labels_of_cluster(clusters, cluster, labels):
     # return [labels[i] for i, c in enumerate(clusters) if c == cluster]
 
 
-def clustering(vectors, labels):
+def clustering(vectors, labels, n_clusters=100):
     """
     使用层次聚类算法进行聚类分析，按照簇的大小进行排序，返回排序后的集合
 
@@ -49,11 +49,8 @@ def clustering(vectors, labels):
     """
     # 聚类分析
     # clustering = AgglomerativeClustering(n_clusters=50)
-    # clustering = KMeans(n_clusters=50, n_init='auto')
-    # clustering = SpectralClustering()
-    clustering = SpectralClustering(n_clusters=50)
-    # clustering = DBSCAN()
-    # clustering = MeanShift() # 均值漂移，效果不理想
+    # clustering = KMeans(n_clusters=50, n_init='auto', random_state=233)
+    clustering = SpectralClustering(n_clusters=n_clusters, random_state=233)
     clusters = clustering.fit_predict(vectors)
 
     # 统计每个簇的大小
