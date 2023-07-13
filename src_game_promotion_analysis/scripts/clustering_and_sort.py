@@ -8,6 +8,7 @@ from utils.tokens import normalize_split_text
 from utils.embedding import openai_embeddings
 from models.web_page_item import WebPageItem
 from utils.clustering import clustering, get_labels_of_cluster
+from llm.map_reduce_summarizer import map_reduce_summary
 
 from logger.setup_logger import get_loguru_logger
 
@@ -72,3 +73,7 @@ if __name__ == "__main__":
 
     blocks = get_text_blocks_of_labels(largest_cluster_labels)
     print(blocks)
+    cluster_text = '\n'.join(blocks)
+    result = map_reduce_summary(cluster_text)
+    print(result)
+
