@@ -4,7 +4,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from mongoengine import connect
 
-from utils.tokens import normalize_split_text
+from utils.tokens import split_text_by_tokens
 from utils.embedding import openai_embeddings
 from models.web_page_item import WebPageItem
 from logger.setup_logger import get_loguru_logger
@@ -18,9 +18,9 @@ connect('ff16-news-collector')
 
 def __get_summary_text(record: WebPageItem) -> str:
     """获取摘要文本"""
-    text = record.goose_article.get('cleaned_text', '')
-    if text:
-        return text
+    # text = record.goose_article.get('cleaned_text', '')
+    # if text:
+    #     return text
     
     text = record.llm_summary
     if text:
@@ -34,7 +34,7 @@ def __save_normalized_blocks(record: WebPageItem, summary_text: str) -> list:
     if record.normalized_text_blocks:
         return record.normalized_text_blocks
 
-    normalized_blocks = normalize_split_text(summary_text, max_num_tokens=300)
+    normalized_blocks = split_text_by_tokens(summary_text, chunk_size=300)
     record.normalized_text_blocks = normalized_blocks
     record.save()
     logger.info(f'保存归一化文本: {record.url} {record.title}')
