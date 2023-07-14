@@ -6,6 +6,8 @@ class GoogleSearchResult(Document):
     created_at = DateTimeField(default=datetime.utcnow)
     updated_at = DateTimeField(default=datetime.utcnow)
 
+    
+    search_keyword = StringField(required=True)
     search_url = StringField(required=True)
     search_result_html = StringField(required=True)
     result_items_count = IntField(required=True)

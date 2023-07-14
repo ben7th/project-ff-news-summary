@@ -32,8 +32,9 @@ async def get_page_html(url):
     return html_content, result_items_count
 
 # 保存搜索结果
-def save_search_result(url, html_content, result_items_count):
+def save_search_result(keyword, url, html_content, result_items_count):
     search_result = GoogleSearchResult(
+        search_keyword=keyword,
         search_url=url,
         search_result_html=html_content,
         result_items_count=result_items_count,
@@ -41,16 +42,16 @@ def save_search_result(url, html_content, result_items_count):
     search_result.save()
 
 # 调用搜索
-async def main(url):
+async def main(keyword, url):
     connect_to_db()
     html_content, result_items_count = await get_page_html(url)
-    save_search_result(url, html_content, result_items_count)
+    save_search_result(keyword, url, html_content, result_items_count)
 
 # 组织搜索 url
 def search(keyword):
     print(f'开始搜索 {keyword}')
     url = f'https://www.google.com/search?q={keyword}&num=100'
-    asyncio.run(main(url))
+    asyncio.run(main(keyword, url))
 
 # if __name__ == '__main__':
 #     search('最终幻想16')
