@@ -43,7 +43,7 @@ def LLM_html_summary(title, html_text, verbose=False):
     text_content = get_text_content(html_text)
     splitted_texts = __split(text_content)
 
-    prYellow(PROMPT)
+    # prYellow(PROMPT)
 
     results = []
     count = len(splitted_texts)
