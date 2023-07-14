@@ -44,7 +44,7 @@ import loguru
 # 禁用日志输出到命令行
 loguru.logger.remove()
 
-def get_loguru_logger(name: str, log_file_path: str, log_level: str = 'DEBUG', console_level: str = 'ERROR'):
+def get_loguru_logger(name: str, log_file_path: str, log_level: str = 'ERROR', console_level: str = 'INFO'):
     new_logger = loguru.logger.bind(name=name)
 
     # 添加文件处理器
