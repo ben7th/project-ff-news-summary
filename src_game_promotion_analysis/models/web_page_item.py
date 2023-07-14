@@ -11,8 +11,7 @@ class WebPageItem(Document):
 
     pyppeteer_content = StringField()  # 使用 pyppeteer 抓取的网页 html 内容
 
-    # goose_article = DictField()  # 使用 goose 清洗后的对象内容
-    # llm_summary = StringField()  # 使用 llm 提取的原文内容
+    llm_summary = StringField()  # 使用 llm 提取的原文内容
 
     # normalized_text_blocks = ListField()  # 按较为一致的长度（以 tokens 计算）切分后的文本片段数组
     # block_embeddings = ListField(ListField(FloatField()))  # 向量化结果
