@@ -18,7 +18,7 @@ async def get_page_html(url):
     await page.goto(url, timeout=60000, waitUntil='networkidle2')
 
     html_content = await page.evaluate('''() => {
-        return document.querySelector("#search").outerHTML;
+        return document.querySelector("#main").outerHTML;
     }''')
 
     result_items_count = await page.evaluate('''() => {
