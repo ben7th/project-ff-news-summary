@@ -22,3 +22,4 @@ class WebPageEmbeddingItem(Document):
     page_meta = DictField(required=True)  # url, title, source, language
 
     normalized_text_blocks = ListField()  # 按 <主题要点文本> fix 并切分后的文本块
+    block_embeddings = ListField(ListField(FloatField()))  # 向量化结果
