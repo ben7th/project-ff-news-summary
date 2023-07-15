@@ -8,7 +8,7 @@ from logger.setup_logger import get_loguru_logger
 logger = get_loguru_logger('check_topic', log_file_path='../logs/check_topic.log',
                            console_level='INFO')
 
-from models.web_page_item import WebPageItem
+from models.web_page_item import WebPageItem, WebPageEmbeddingItem
 
 def __fix_text(text):
     lines = text.split('\n')
@@ -52,20 +52,43 @@ def __check_text_format(text):
     
     return True
 
+def __save_embedding_item(record, fixed_topics_text):
+    url = record.url
+    page_meta = {
+        'url': record.url,
+        'title': record.title,
+        'source': record.source,
+        'language': record.language
+    }
+    normalized_text_blocks = fixed_topics_text.split('\n\n')
+
+    WebPageEmbeddingItem.objects(url=url).update_one(
+        set__page_meta=page_meta,
+        set__normalized_text_blocks=normalized_text_blocks,
+        upsert=True
+    )
+
+    return len(normalized_text_blocks)
+
 def main():
     records = WebPageItem.objects
     total = len(records)
 
     errors = {}
     text_count = 0
+    parts_count = 0
+
     for index, record in enumerate(records, start=1):
         if not record.llm_topics_text:
             continue
 
         # print(f'{index}/{total}: {record.title} {record.id}')
-        fixed_text = __fix_text(record.llm_topics_text)
-        check_result = __check_text_format(fixed_text)
+        fixed_topics_text = __fix_text(record.llm_topics_text)
+        check_result = __check_text_format(fixed_topics_text)
         text_count += 1
+
+        parts_count += __save_embedding_item(record, fixed_topics_text)
+
         # print(check_result)
         if not check_result:
             errors[str(record.id)] = record.id
@@ -73,6 +96,7 @@ def main():
 
     print(f'text_count: {text_count}')
     print(f'error_count: {len(errors)}')
+    print(f'总片段数量: {parts_count}')
 
 if __name__ == '__main__':
     connect_to_db()
