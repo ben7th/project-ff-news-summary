@@ -18,7 +18,7 @@ def __save_normalized_blocks(record: WebPageItem, summary_text: str) -> list:
     if record.normalized_text_blocks:
         return record.normalized_text_blocks
 
-    normalized_blocks = split_text_by_tokens(summary_text, chunk_size=300)
+    normalized_blocks = split_text_by_tokens(summary_text, tokens_size=300)
     record.normalized_text_blocks = normalized_blocks
     record.save()
     logger.info(f'保存归一化文本: {record.url} {record.title}')
