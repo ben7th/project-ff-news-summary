@@ -9,9 +9,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 DEFAULT_MODEL_NAME = 'gpt-3.5-turbo'
 
 def num_tokens_from_string(string: str, model_name: str=DEFAULT_MODEL_NAME) -> int:
-    """
-    返回文本字符串中的 token 数量。
-    """
+    """ 返回文本字符串中的 token 数量。"""
     encoding = tiktoken.encoding_for_model(model_name)
     num_tokens = len(encoding.encode(string))
     return num_tokens
@@ -56,3 +54,10 @@ def normalize_split_text(text: str, max_num_tokens: int=500) -> list:
         normalized_blocks.append(current_block.strip())
 
     return normalized_blocks
+
+def normailze_text_for_llm_summary(text_content: str, chunk_size: 1000):
+    text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
+        chunk_size=chunk_size, chunk_overlap=0
+    )
+    texts = text_splitter.split_text(text_content)
+    return texts

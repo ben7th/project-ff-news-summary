@@ -2,8 +2,6 @@ import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from utils.tokens import split_text_by_tokens
-from prompts.summarization import generate_summary_prompt_for_cluster
 from llm.request_gpt import request_gpt
 from utils.remove_html_tags import get_text_content
 from langchain.text_splitter import RecursiveCharacterTextSplitter

@@ -1,32 +1,16 @@
 import os
 import sys
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+SRC_PATH = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(SRC_PATH)
 
-from mongoengine import connect
+from setup.setup import connect_to_db
+from logger.setup_logger import get_loguru_logger
+logger = get_loguru_logger('normalize_and_embedding', log_file_path='../logs/normalize_and_embedding.log',
+                           console_level='INFO')
 
 from utils.tokens import split_text_by_tokens
 from utils.embedding import openai_embeddings
 from models.web_page_item import WebPageItem
-from logger.setup_logger import get_loguru_logger
-
-logger = get_loguru_logger('normalize_and_embedding', log_file_path='../logs/normalize_and_embedding.log',
-                           console_level='INFO')
-
-# 连接到 MongoDB 数据库
-connect('ff16-news-collector')
-
-
-def __get_summary_text(record: WebPageItem) -> str:
-    """获取摘要文本"""
-    # text = record.goose_article.get('cleaned_text', '')
-    # if text:
-    #     return text
-    
-    text = record.llm_summary
-    if text:
-        return text
-    
-    return None
 
 
 def __save_normalized_blocks(record: WebPageItem, summary_text: str) -> list:
