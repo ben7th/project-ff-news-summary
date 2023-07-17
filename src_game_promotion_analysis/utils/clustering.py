@@ -5,6 +5,8 @@ from sklearn.cluster import DBSCAN
 from sklearn.cluster import MeanShift
 
 from sklearn.metrics import pairwise_distances
+from sklearn.metrics import silhouette_score
+
 import numpy as np
 
 def get_labels_of_cluster(clusters, cluster, labels):
@@ -69,3 +71,58 @@ def clustering(vectors, labels, n_clusters=100):
     # print(f"Largest cluster: {largest_cluster_labels}")
 
     return sorted_clusters, clusters
+
+
+
+def find_best_k(data, start_k=50, end_k=200):
+    """
+    使用肘部法则和轮廓系数寻找最佳的聚类数量
+
+    参数:
+    data: 一个包含所有向量的列表，列表中每个元素都是一个向量
+    start_k: 尝试聚类数量的起始值（包含）
+    end_k: 尝试聚类数量的结束值（不包含）
+
+    返回:
+    best_k_elbow: 使用肘部法则得到的最佳聚类数量
+    best_k_silhouette: 使用轮廓系数得到的最佳聚类数量
+    """
+    # 转换数据为 numpy 数组，以便后续计算
+    X = np.array(data)
+
+    # 初始化列表，用于存储每个 k 值对应的 SSE（误差平方和）和轮廓系数
+    distortions = []
+    silhouette_scores = []
+    K = range(start_k, end_k)
+
+    # 遍历所有可能的 k 值
+    for k in K:
+        print(f'尝试聚类 k = {k}')
+        # 初始化并训练 KMeans 模型
+        kmeans = KMeans(n_clusters=k, random_state=42, n_init='auto')
+        kmeans.fit(X)
+        # 将当前 k 值对应的 SSE 添加到列表中
+        distortions.append(kmeans.inertia_)
+        # 计算轮廓系数并添加到列表中
+        silhouette_scores.append(silhouette_score(X, kmeans.labels_))
+
+    # 计算每两个相邻 k 值的 SSE 之差，得到斜率列表
+    slopes = -np.diff(distortions)
+    # 找到斜率最大的点对应的 k 值，加 1 是因为 np.diff 计算的是从 start_k+1 开始的差值
+    best_k_elbow = np.argmax(slopes) + start_k + 1
+
+    # 找到轮廓系数最大的对应的 k 值
+    best_k_silhouette = np.argmax(silhouette_scores) + start_k
+
+    # import matplotlib.pyplot as plt
+
+    # # 绘制轮廓系数图
+    # plt.figure(figsize=(16,8))
+    # plt.plot(K, silhouette_scores, 'bx-')
+    # plt.xlabel('k')
+    # plt.ylabel('Silhouette Score')
+    # plt.title('The Silhouette Method showing the optimal k')
+    # plt.show()
+
+    return best_k_elbow, best_k_silhouette
+
