@@ -6,6 +6,8 @@ from sklearn.cluster import MeanShift
 
 from sklearn.metrics import pairwise_distances
 from sklearn.metrics import silhouette_score
+from sklearn.metrics import calinski_harabasz_score
+from sklearn.metrics import davies_bouldin_score
 
 import numpy as np
 
@@ -73,10 +75,24 @@ def clustering(vectors, labels, n_clusters=100):
     return sorted_clusters, clusters
 
 
+def do_clustering_kmeans(data, labels, k):
+    X = np.array(data)
+    kmeans = KMeans(n_clusters=k, random_state=42, n_init='auto')
+    kmeans.fit(X)
+
+    # 创建一个二维列表用于存储按照聚类结果分组的标签
+    clusters = [[] for _ in range(k)]
+    
+    # 将每个标签按照聚类结果分组
+    for i, label in enumerate(labels):
+        clusters[kmeans.labels_[i]].append(label)
+
+    return clusters
+
 
 def find_best_k(data, start_k=50, end_k=200):
     """
-    使用肘部法则和轮廓系数寻找最佳的聚类数量
+    使用肘部法则、轮廓系数、Calinski-Harabasz 指标和 Davies-Bouldin 指标寻找最佳的聚类数量
 
     参数:
     data: 一个包含所有向量的列表，列表中每个元素都是一个向量
@@ -86,13 +102,17 @@ def find_best_k(data, start_k=50, end_k=200):
     返回:
     best_k_elbow: 使用肘部法则得到的最佳聚类数量
     best_k_silhouette: 使用轮廓系数得到的最佳聚类数量
+    best_k_ch: 使用 Calinski-Harabasz 指标得到的最佳聚类数量
+    best_k_db: 使用 Davies-Bouldin 指标得到的最佳聚类数量
     """
     # 转换数据为 numpy 数组，以便后续计算
     X = np.array(data)
 
-    # 初始化列表，用于存储每个 k 值对应的 SSE（误差平方和）和轮廓系数
+    # 初始化列表，用于存储每个 k 值对应的 SSE（误差平方和）、轮廓系数、Calinski-Harabasz 指标和 Davies-Bouldin 指标
     distortions = []
     silhouette_scores = []
+    calinski_harabasz_scores = []
+    davies_bouldin_scores = []
     K = range(start_k, end_k)
 
     # 遍历所有可能的 k 值
@@ -105,6 +125,10 @@ def find_best_k(data, start_k=50, end_k=200):
         distortions.append(kmeans.inertia_)
         # 计算轮廓系数并添加到列表中
         silhouette_scores.append(silhouette_score(X, kmeans.labels_))
+        # 计算 Calinski-Harabasz 指标并添加到列表中
+        calinski_harabasz_scores.append(calinski_harabasz_score(X, kmeans.labels_))
+        # 计算 Davies-Bouldin 指标并添加到列表中
+        davies_bouldin_scores.append(davies_bouldin_score(X, kmeans.labels_))
 
     # 计算每两个相邻 k 值的 SSE 之差，得到斜率列表
     slopes = -np.diff(distortions)
@@ -114,15 +138,47 @@ def find_best_k(data, start_k=50, end_k=200):
     # 找到轮廓系数最大的对应的 k 值
     best_k_silhouette = np.argmax(silhouette_scores) + start_k
 
-    # import matplotlib.pyplot as plt
+    # 找到 Calinski-Harabasz 指标最大的对应的 k 值
+    best_k_ch = np.argmax(calinski_harabasz_scores) + start_k
 
-    # # 绘制轮廓系数图
-    # plt.figure(figsize=(16,8))
-    # plt.plot(K, silhouette_scores, 'bx-')
-    # plt.xlabel('k')
-    # plt.ylabel('Silhouette Score')
-    # plt.title('The Silhouette Method showing the optimal k')
-    # plt.show()
+    # 找到 Davies-Bouldin 指标最小的对应的 k 值
+    best_k_db = np.argmin(davies_bouldin_scores) + start_k
 
-    return best_k_elbow, best_k_silhouette
+    return best_k_elbow, best_k_silhouette, best_k_ch, best_k_db
 
+
+def find_peak_ks(data, start_k=50, end_k=200):
+    """
+    使用轮廓系数找峰值来寻找可能的最佳聚类数量
+
+    参数:
+    data: 一个包含所有向量的列表，列表中每个元素都是一个向量
+    start_k: 尝试聚类数量的起始值（包含）
+    end_k: 尝试聚类数量的结束值（不包含）
+
+    返回:
+    peaks: 一个列表，包含所有找到的峰值对应的聚类数量
+    """
+    X = np.array(data)
+
+    silhouette_scores = []
+    K = range(start_k, end_k)
+
+    for k in K:
+        print(f'尝试聚类 k = {k}')
+        kmeans = KMeans(n_clusters=k, random_state=42, n_init='auto')
+        kmeans.fit(X)
+        silhouette_scores.append(silhouette_score(X, kmeans.labels_))
+
+    # 计算轮廓系数的一阶差分，也就是导数
+    derivatives = np.diff(silhouette_scores)
+
+    # 初始化峰值列表
+    peaks = []
+
+    # 遍历所有导数值，找到所有从正变为负的位置，对应的就是峰值
+    for i in range(1, len(derivatives)):
+        if derivatives[i-1] > 0 and derivatives[i] < 0:
+            peaks.append(i + start_k)
+
+    return peaks
