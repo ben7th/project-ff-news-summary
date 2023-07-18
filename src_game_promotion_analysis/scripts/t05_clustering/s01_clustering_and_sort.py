@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from models.web_page_item import WebPageEmbeddingItem
+from models.clustering_result import ClusteringResult
 from utils.clustering import find_best_k
 from utils.clustering import find_peak_ks
 from utils.clustering import do_clustering_kmeans
@@ -66,3 +67,10 @@ if __name__ == "__main__":
         print(f'index: {idx}, len: {len(c)}')
         print(c)
         print()
+
+    # 保存到数据库
+    ClusteringResult.objects(name='ff16-kmeans-2023-07-18').update_one(
+        upsert=True,
+        set__clusters=clusters
+    )
+    print(f'已保存到数据库')
