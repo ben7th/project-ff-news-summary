@@ -23,3 +23,5 @@ class WebPageEmbeddingItem(Document):
 
     normalized_text_blocks = ListField()  # 按 <主题要点文本> fix 并切分后的文本块
     block_embeddings = ListField(ListField(FloatField()))  # 向量化结果
+
+    normalized_text_lines = ListField()  # 按行切分的文本块

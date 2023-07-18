@@ -9,32 +9,7 @@ logger = get_loguru_logger('check_topic', log_file_path='../logs/check_topic.log
                            console_level='INFO')
 
 from models.web_page_item import WebPageItem, WebPageEmbeddingItem
-
-def __fix_text(text):
-    lines = text.split('\n')
-    processed_lines = []
-    previous_line = ''
-
-    for line in lines:
-        _line = line.strip()
-        
-        # 移除 "```" 行
-        if _line == '```':
-            continue
-
-        # 去掉 "<" 和 ">"，只保留中间内容
-        if _line.startswith('<') and _line.endswith('>'):
-            _line = _line[1:-1]
-
-        # 只保留一个空行
-        if _line == '' and previous_line == '':
-            continue
-
-        processed_lines.append(_line)
-        previous_line = _line
-
-    processed_text = '\n'.join(processed_lines)
-    return processed_text
+from utils.texts import fix_text
 
 def __check_text_format(text):
     paragraphs = text.split('\n\n')
@@ -83,7 +58,7 @@ def main():
             continue
 
         # print(f'{index}/{total}: {record.title} {record.id}')
-        fixed_topics_text = __fix_text(record.llm_topics_text)
+        fixed_topics_text = fix_text(record.llm_topics_text)
         check_result = __check_text_format(fixed_topics_text)
         text_count += 1
 
