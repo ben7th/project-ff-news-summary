@@ -11,3 +11,5 @@ class ClusteringResult(Document):
 
     meaningful_check_results = DictField()  # 内容有效性检查结果
     meaningful_texts = DictField()
+
+    meaningful_texts_with_meta = DictField()  # 有效内容段落对应的元数据
